@@ -1,17 +1,18 @@
 // import { useState } from 'react'
 // import './App.css'
 
-import { Flex, Divider } from "antd";
-import Login from "./pages/core/login";
-import LoginOptions from "./pages/core/login_options";
+import { Routes, Route } from "react-router";
+import Home from "./pages/core/home";
+import Register from "./pages/core/register";
+
+// 路由處理
 
 const App = () => {
     return (
-        <Flex justify="center" gap="large">
-            <Login/>
-            <Divider type="vertical" style={{ height: 200 }}/>
-            <LoginOptions/>
-        </Flex>
+        <Routes>
+            <Route path="/" element={ <Home/> } />
+            <Route path="/register" element={ <Register/> } />
+        </Routes>
     )
 };
 

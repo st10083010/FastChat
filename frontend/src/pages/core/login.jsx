@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 
 const Login = () => (
-    <Form name='basic' labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} style={{ minWidth: 450 }}>
+    <Form name='loginForm' labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} style={{ minWidth: 450 }}>
         <Form.Item label="Account" name="account" >
             <Input/>
         </Form.Item>
