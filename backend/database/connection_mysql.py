@@ -47,6 +47,3 @@ class MySQL():
             c.execute(sql)
             result = c.fetchall()
             return result
-        
-result = MySQL().test()
-print(result)

@@ -1,9 +1,12 @@
 import React from 'react';
 import { Button, Flex, Form, Input } from 'antd';
+import { req_post } from '../../tools/request';
 
 const Register = () => {
-    const onFinish = (values) => {
-        console.log("values: ", values);
+    const onFinish = async (values) => {
+        const path = "auth/register";
+        const response = await req_post(values, path);
+        console.log("Response: ", response);
     };
 
     return (
@@ -38,7 +41,7 @@ const Register = () => {
                     <Input.Password/>
                 </Form.Item>
 
-                <Form.Item label="Confirm Password" name="confirmPassword" dependencies={["password"]} rules={[
+                <Form.Item label="Confirm Password" name="confirm_password" dependencies={["password"]} rules={[
                     { required: true, message: "Please input your Confirm Password" },
                     ({ getFieldValue }) => ({
                         validator(_, value) {
