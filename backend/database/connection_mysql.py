@@ -16,7 +16,7 @@ def read_json_file() -> dict:
     return result
 
 
-class MySQL():
+class ChatRDBMS():
     def __init__(self):
         env = read_env()
         json_file = read_json_file()
@@ -40,10 +40,22 @@ class MySQL():
     def close(self):
         if self.conn:
             self.conn.close()
-
-    def test(self):
+        
+    def create_new_one(self, sql: str, datas: list[str]):
         with self.conn.cursor() as c:
-            sql = "show tables"
-            c.execute(sql)
-            result = c.fetchall()
-            return result
+            c.execute(sql, tuple(datas))
+            self.conn.commit()
+
+    def select_one(self, sql: str, datas: list[str]):
+        result = None
+        with self.conn.cursor() as c:
+            c.execute(sql, tuple(datas))
+            result = c.fetchone()
+            self.conn.commit()
+
+        return result
+    
+    def update_one(self, sql: str, datas: list[str]):
+        with self.conn.cursor() as c:
+            c.execute(sql, tuple(datas))
+            self.conn.commit()

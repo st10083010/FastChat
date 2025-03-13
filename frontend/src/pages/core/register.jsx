@@ -1,16 +1,33 @@
-import React from 'react';
-import { Button, Flex, Form, Input } from 'antd';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { Button, Flex, Form, Input, Modal } from 'antd';
 import { req_post } from '../../tools/request';
 
 const Register = () => {
+    // TODO: 錯誤處理
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [registerResultInfo, setRegisterResultInfo] = useState("");
+    const navigate = useNavigate();
+
+    const registerSuccess = () => {
+        setIsOpenModal(false);
+        navigate("/");
+    }
+
     const onFinish = async (values) => {
         const path = "auth/register";
         const response = await req_post(values, path);
-        console.log("Response: ", response);
+        setRegisterResultInfo(response.msg);
+        setIsOpenModal(true);
     };
 
     return (
         <>
+            <Modal title={"Register result"} open={isOpenModal} onOk={registerSuccess} onCancel={() => {setIsOpenModal(false)}}>
+                <p>{registerResultInfo}</p>
+                <p>點擊 ok 至登入頁面重新登入</p>
+            </Modal>
+
             <Flex align={'center'} justify={'space-between'}>
                 <Button type='default' href='/'>Return</Button>
                 <h1>Register</h1>

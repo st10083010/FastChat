@@ -1,26 +1,38 @@
 import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
+import { req_post } from '../../tools/request';
 
-const Login = () => (
-    <Form name='loginForm' labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} style={{ minWidth: 450 }}>
-        <Form.Item label="Account" name="account" >
-            <Input/>
-        </Form.Item>
+const Login = () => {
+    const onLogin = async (values) => {
+        const path = "auth/login";
+        const response = await req_post(values, path);
+        console.log(response);
+    }
 
-        <Form.Item label="Password" name="password">
-            <Input.Password/>
-        </Form.Item>
 
-        <Form.Item name="remember" valuePropName="checked" label={null}>
-            <Checkbox>Remember Me</Checkbox>
-        </Form.Item>
+    return (
+        <Form name='loginForm' labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} style={{ minWidth: 450 }}
+            onFinish={onLogin}
+        >
+            <Form.Item label="Email" name="email" >
+                <Input/>
+            </Form.Item>
 
-        <Form.Item label={null}>
-            <Button type="primary" htmlType="submit">
-                Submit
-            </Button>
-        </Form.Item>
-    </Form>
-);
+            <Form.Item label="Password" name="password">
+                <Input.Password/>
+            </Form.Item>
+
+            {/* <Form.Item name="remember" valuePropName="checked" label={null}>
+                <Checkbox>Remember Me</Checkbox>
+            </Form.Item> */}
+
+            <Form.Item label={null}>
+                <Button type="primary" htmlType="submit">
+                    Submit
+                </Button>
+            </Form.Item>
+        </Form>
+    )
+};
 
 export default Login;

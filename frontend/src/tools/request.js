@@ -4,7 +4,6 @@ export let req_post = (data, path) => {
         "Content-Type": "application/json"
     };
     let body = JSON.stringify(data);
-    console.log(body);
 
     let result = fetch(url, {
         method: "POST",
