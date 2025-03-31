@@ -25,3 +25,13 @@ class Tbl_Users(ChatRDBMS):
         sql += " Where id = %s "
 
         self.update_one(sql=sql, datas=[new_hashed_pw, user_id])
+
+    def find_an_user_by_id(self, user_id: int):
+        # 透過 id 尋找使用者
+        int_user_id = int(user_id)
+        sql = " Select id, username, email "
+        sql += f" From {self.table_name} "
+        sql += f" Where id = %s "
+
+        result = self.select_one(sql=sql, datas=[int_user_id])
+        return result

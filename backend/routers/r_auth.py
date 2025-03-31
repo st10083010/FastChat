@@ -1,7 +1,9 @@
 from fastapi import APIRouter, status, Response
+from fastapi.responses import JSONResponse
 from backend.schemas.users import Register, Users
 from argon2 import PasswordHasher
 from backend.database.rdbms.tbl_users import Tbl_Users
+from backend.handlers.hd_cores import HD_Cores
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -49,4 +51,10 @@ async def login_user(login_user: Users):
         new_hashed_pw = ph.hash(plain_text_pw)
         tbl_users.update_user_password_hash_value(new_hashed_pw=new_hashed_pw, user_id=user_info['id'])
 
-    return result
+    token = HD_Cores.create_access_token({
+        "sub": str(user_info['id'])
+    })
+
+    res = JSONResponse(content=result)
+    res.set_cookie(key="access_token", value=token, httponly=True)
+    return res

@@ -1,6 +1,7 @@
 # 自定義
 setting.json
 env.txt
+token.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
