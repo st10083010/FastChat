@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Button, Flex, Form, Input, Modal } from 'antd';
-import { req_post } from '../../tools/request';
+import { baseUrl, headers } from '../../configs/config';
 
+// 註冊
 const Register = () => {
     // TODO: 錯誤處理
     const [isOpenModal, setIsOpenModal] = useState(false);
@@ -15,9 +16,22 @@ const Register = () => {
     }
 
     const onFinish = async (values) => {
-        const path = "auth/register";
-        const response = await req_post(values, path);
-        setRegisterResultInfo(response.msg);
+        // 送出註冊表單
+        const path = baseUrl + "auth/register";
+
+        let datas = JSON.stringify(values);
+        const res = await fetch(path, {
+            method: "POST",
+            headers: headers,
+            body: datas
+        }).then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        });
+
+        setRegisterResultInfo(res.msg);
         setIsOpenModal(true);
     };
 

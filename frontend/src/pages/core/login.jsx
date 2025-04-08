@@ -1,12 +1,31 @@
 import React from 'react';
 import { Button, Form, Input } from 'antd';
-import { req_post } from '../../tools/request';
+import { baseUrl, headers } from '../../configs/config';
+import { useNavigate } from 'react-router';
 
+// 登入
 const Login = () => {
+    const navigate = useNavigate();
+
     const onLogin = async (values) => {
-        const path = "auth/login";
-        const response = await req_post(values, path);
-        console.log(response);
+        // 送出登入表單
+        const path = baseUrl + "auth/login";
+
+        let datas = JSON.stringify(values);
+        const res = await fetch(path, {
+            method: "POST",
+            headers: headers,
+            body: datas,
+            credentials: "include"
+        });
+
+        // console.log(res);
+        if (res.ok) {
+            navigate("/user_info");
+        } else {
+            // TODO: Error處理
+            console.log("error");
+        }
     }
 
 

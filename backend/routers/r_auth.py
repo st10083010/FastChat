@@ -56,5 +56,7 @@ async def login_user(login_user: Users):
     })
 
     res = JSONResponse(content=result)
-    res.set_cookie(key="access_token", value=token, httponly=True)
+
+    # TODO: 正式上線時須注意設定
+    res.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", secure=False, path="/")
     return res

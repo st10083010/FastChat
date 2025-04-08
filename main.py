@@ -1,16 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers.r_auth import auth
+from backend.routers.r_info import info
 
 app = FastAPI()
 
 # Routes
 app.include_router(auth)
+app.include_router(info)
 
 # CORS
+origins = [
+    "http://localhost:5173"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], # 允許前端
+    allow_origins=origins, # 允許前端
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
