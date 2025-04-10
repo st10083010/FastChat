@@ -1,6 +1,16 @@
 import { Menu } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { switchRoom } from '../../store/chat_slice';
 
 const ChatSidebar = () => {
+    const dispatch = useDispatch();
+    const curRoomId = useSelector((state) => state.chat.curRoomId);
+
+    const onRoomClick = ({ key }) => {
+        // 聊天室被點擊時
+        dispatch(switchRoom(key));
+    }
+
     const items = [
         {
             label: '聊天室 A',
@@ -13,7 +23,7 @@ const ChatSidebar = () => {
     ];
 
     return (
-        <Menu items={items} onClick={(e) => {console.log("Clicked: ", e)}}/>
+        <Menu items={items} onClick={onRoomClick} selectedKeys={[curRoomId]} />
     )
 }
 

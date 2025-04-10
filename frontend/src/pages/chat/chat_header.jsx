@@ -1,5 +1,13 @@
+import { useSelector } from 'react-redux';
+
 const ChatHeader = () => {
-    return <h3>目前聊天室：聊天室 A</h3>;
+    const roomId = useSelector((state) => 
+        state.chat.curRoomId
+    )
+
+    return (
+        <h3 style={{ color: "white" }}>目前聊天室：{roomId}</h3>
+    );
 }
 
 export default ChatHeader;

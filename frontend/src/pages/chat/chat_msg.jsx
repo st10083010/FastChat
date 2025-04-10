@@ -1,14 +1,16 @@
+import { useSelector } from 'react-redux';
+
 const ChatMsg = () => {
-    const messages = [
-        { id: 1, sender: 'Alice', content: '嗨嗨！' },
-        { id: 2, sender: 'Bob', content: '你好！' },
-    ];
+    const { curRoomId, msgByRoom } = useSelector((state) => state.chat);
+    const msgs = msgByRoom[curRoomId] || [];
     
     return (
         <div>
-            {messages.map(msg => (
-                <p key={msg.id}><strong>{msg.sender}：</strong>{msg.content}</p>
-            ))}
+            {msgs.map((msg, index) => {
+                <p key={index}>
+                    <strong>{msg.sender}: </strong> {msg.content}
+                </p>
+            })}
         </div>
       );
 }

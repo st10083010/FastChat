@@ -4,7 +4,7 @@ import LoginOptions from "./login_options";
 
 const Home = () => {
     return (
-        <Flex justify="center" gap="large">
+        <Flex justify="center" gap="large" align="center" style={{ height: '100vh' }}>
             <Login/>
             <Divider type="vertical" style={{ height: 200 }}/>
             <LoginOptions/>
