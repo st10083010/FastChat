@@ -6,11 +6,11 @@ const ChatMsg = () => {
     
     return (
         <div>
-            {msgs.map((msg, index) => {
+            {msgs.map((msg, index) => (
                 <p key={index}>
                     <strong>{msg.sender}: </strong> {msg.content}
                 </p>
-            })}
+            ))}
         </div>
       );
 }

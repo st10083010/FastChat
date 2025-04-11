@@ -2,12 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers.r_auth import auth
 from backend.routers.r_info import info
+from backend.routers.r_chat import chat
 
 app = FastAPI()
 
 # Routes
 app.include_router(auth)
 app.include_router(info)
+app.include_router(chat)
 
 # CORS
 origins = [

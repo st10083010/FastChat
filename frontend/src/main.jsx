@@ -9,6 +9,7 @@ import { store } from './store/index.js';
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
+        {/* 讓 React 可以使用 Redux 的 Store */}
         <Provider store={store}>
             <BrowserRouter>
                 <App />

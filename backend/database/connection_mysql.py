@@ -15,6 +15,15 @@ def read_json_file() -> dict:
     result = json.loads(content)
     return result
 
+def get_table(cls):
+    def dependency():
+        table = cls()
+        try:
+            yield table
+        finally:
+            table.close()
+
+        return dependency
 
 class ChatRDBMS():
     def __init__(self):
@@ -59,3 +68,11 @@ class ChatRDBMS():
         with self.conn.cursor() as c:
             c.execute(sql, tuple(datas))
             self.conn.commit()
+
+    def select_all(self, sql: str, datas: list[str]):
+        result = None
+        with self.conn.cursor() as c:
+            c.execute(sql, tuple(datas))
+            result = c.fetchall()
+
+        return result

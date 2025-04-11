@@ -1,6 +1,6 @@
-// 使用Redux做全域管理
 import { createSlice } from '@reduxjs/toolkit';
 
+// 定義初始狀態
 const initState = {
     curRoomId: 'room1',
     msgByRoom: {
@@ -14,6 +14,7 @@ const initState = {
     }
 };
 
+// 定義可執行的操作
 const chatSlice = createSlice({
     name: 'chat',
     initialState: initState,

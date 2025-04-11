@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import chatSlice from './chat_slice';
 
+// 將reducer加入全域store
 export const store = configureStore({
     reducer: {
         chat: chatSlice.reducer
