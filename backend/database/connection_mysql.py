@@ -15,16 +15,6 @@ def read_json_file() -> dict:
     result = json.loads(content)
     return result
 
-def get_table(cls):
-    def dependency():
-        table = cls()
-        try:
-            yield table
-        finally:
-            table.close()
-
-        return dependency
-
 class ChatRDBMS():
     def __init__(self):
         env = read_env()
