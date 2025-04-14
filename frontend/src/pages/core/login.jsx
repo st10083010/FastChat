@@ -21,7 +21,7 @@ const Login = () => {
 
         // console.log(res);
         if (res.ok) {
-            navigate("/user_info");
+            navigate("/chat");
         } else {
             // TODO: Error處理
             console.log("error");

@@ -6,10 +6,20 @@ import Home from "./pages/core/home";
 import Register from "./pages/core/register";
 import UserInfo from "./pages/chat/user_info";
 import ChatRoom from "./pages/chat/chat_room";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { checkLogin } from "./store/user_slice";
 
 // 路由處理
 
 const App = () => {
+    const dispatch = useDispatch();
+
+    // 檢查登入狀態
+    useEffect(() => {
+        dispatch(checkLogin());
+    }, [dispatch])
+
     return (
         <Routes>
             <Route path="/" element={ <Home/> } />

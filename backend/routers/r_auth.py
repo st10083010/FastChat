@@ -27,7 +27,7 @@ async def register_user(register_user: Register, response: Response):
 
 @auth.post("/login")
 async def login_user(login_user: Users):
-    # TODO: 錯誤處理、JWT登入處理
+    # TODO: 錯誤處理
     result = {
         "code": 1,
         "msg": "login Successful."
@@ -60,3 +60,14 @@ async def login_user(login_user: Users):
     # TODO: 正式上線時須注意設定
     res.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", secure=False, path="/")
     return res
+
+@auth.post("/logout")
+async def logout_user(response: Response):
+    # 登出使用者
+    response.delete_cookie("access_token")
+    result = {
+        "code": 1,
+        "msg": "Logged out"
+    }
+
+    return result
