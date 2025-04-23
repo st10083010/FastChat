@@ -8,7 +8,7 @@ const ChatMsg = () => {
         <div>
             {msgs.map((msg) => (
                 <p key={msg.id}>
-                    <strong>{msg.sender_id}: </strong> {msg.content}
+                    <strong>{msg.sender}: </strong> {msg.content}
                 </p>
             ))}
         </div>

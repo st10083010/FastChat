@@ -19,9 +19,9 @@ const Login = () => {
             credentials: "include"
         });
 
-        // console.log(res);
         if (res.ok) {
-            navigate("/chat");
+            const responseBody = await res.json();
+            navigate(`/chat?token=${responseBody.access_token}`);
         } else {
             // TODO: Error處理
             console.log("error");

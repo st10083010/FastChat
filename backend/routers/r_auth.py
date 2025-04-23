@@ -30,7 +30,8 @@ async def login_user(login_user: Users):
     # TODO: 錯誤處理
     result = {
         "code": 1,
-        "msg": "login Successful."
+        "msg": "login Successful.",
+        "access_token": ""
     }
 
     plain_text_pw = login_user.password
@@ -55,11 +56,12 @@ async def login_user(login_user: Users):
         "sub": str(user_info['id'])
     })
 
+    result['access_token'] = token
     res = JSONResponse(content=result)
 
     # TODO: 正式上線時須注意設定
     res.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", secure=False, path="/")
-    return res
+    return result
 
 @auth.post("/logout")
 async def logout_user(response: Response):

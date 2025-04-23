@@ -40,12 +40,16 @@ const userSlice = createSlice({
         userInfo: null,
         isLoggedIn: false,
         status: 'idle',
-        error: null
+        error: null,
+        access_token: null
     },
     reducers: {
         cleanUser(state) {
             state.userInfo = null;
             state.isLoggedIn = false;
+        },
+        setAcessToken(state, action) {
+            state.access_token = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -73,4 +77,4 @@ const userSlice = createSlice({
 });
 
 export const { cleanUser } = userSlice.actions;
-export default userSlice.reducer;
+export default userSlice;

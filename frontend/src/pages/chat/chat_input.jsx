@@ -1,14 +1,19 @@
 import { Input, Button } from 'antd';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useChatSocket } from '../../hooks/useChatSocket';
 
 const ChatInput = () => {
     const [text, setText] = useState('');
+    const curRoomId = useSelector(state => state.chat.curRoomId);
+    const { sendMsg } = useChatSocket(curRoomId);
 
     const handleSend = () => {
-        if (text.trim()) {
-            console.log('送出訊息：', text);
-            setText('');
-        }
+        // 處理送出
+        const trimText = text.trim();
+        if (!trimText) return;
+        sendMsg(trimText);
+        setText(""); // 清空訊息
     };
 
   return (

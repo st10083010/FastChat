@@ -24,6 +24,11 @@ const chatSlice = createSlice({
     reducers: {
         switchRoom(state, action) {
             state.curRoomId = action.payload;
+        },
+        addMsg(state, action) {
+            const { roomId, msg } = action.payload;
+            state.msgByRoom[roomId] = state.msgByRoom[roomId] || [];
+            state.msgByRoom[roomId].push(msg);
         }
     },
     extraReducers: (builder) => {
@@ -34,5 +39,5 @@ const chatSlice = createSlice({
     }
 })
 
-export const { switchRoom } = chatSlice.actions;
+export const { switchRoom, addMsg } = chatSlice.actions;
 export default chatSlice;
