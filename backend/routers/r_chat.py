@@ -9,10 +9,11 @@ chat = APIRouter(prefix="/chat", tags=["Chat CRUD"])
 # 儲存所有聊天室連線
 room_connections: dict[str, list[WebSocket]] = {}
 
-@chat.get("/msg/{room_id}", response_model=list[MsgOut])
-def get_msgs(room_id: int, table=Depends(get_table(Tbl_ChatContent))):
+@chat.get("/msg/{room_id}/{user_id}", response_model=list[MsgOut])
+def get_msgs(room_id: int, user_id: int, table=Depends(get_table(Tbl_ChatContent))):
     # 取得訊息
-    result = table.find_chat_content_by_room_id(room_id)
+    result = table.find_chat_content_by_room_id(room_id, user_id)
+    print("GET MSG: ", result)
 
     return result
 
@@ -33,8 +34,7 @@ async def ws_endpoint(websocket: WebSocket, room_id: str, token: str = Query(...
         # 沒通過身份驗證
         await websocket.close(code=1008)
         return
-    
-    print(payload)
+
     await websocket.accept()
 
 

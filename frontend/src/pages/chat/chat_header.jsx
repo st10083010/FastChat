@@ -2,6 +2,7 @@ import { Button, Flex } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { logout } from '../../store/user_slice';
+import { resetChat } from '../../store/chat_slice';
 
 const ChatHeader = () => {
     const dispatch = useDispatch();
@@ -13,6 +14,7 @@ const ChatHeader = () => {
 
     const onLogOut = () => {
         dispatch(logout());
+        dispatch(resetChat());
         navigate("/");
     }
 

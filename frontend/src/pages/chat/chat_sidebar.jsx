@@ -5,11 +5,12 @@ import { switchRoom, fetchMsgs } from '../../store/chat_slice';
 const ChatSidebar = () => {
     const dispatch = useDispatch();
     const curRoomId = useSelector((state) => state.chat.curRoomId); // 從 store 中取得資料
+    const userId = useSelector(state => state.user.userInfo?.id);
 
     const onRoomClick = ({ key }) => {
         // 聊天室被點擊時
         dispatch(switchRoom(key)); // 使用 dispatch 發出 action 並執行定義好的操作
-        dispatch(fetchMsgs(key))
+        dispatch(fetchMsgs({ roomId: key, userId }));
     }
 
     const items = [

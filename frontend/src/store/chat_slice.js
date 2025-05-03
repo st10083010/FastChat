@@ -10,8 +10,8 @@ const initState = {
 // 抓取聊天室資料，並讓 Redux 統一管理
 export const fetchMsgs = createAsyncThunk(
     'chat/fetchMsgs',
-    async (roomId) => {
-        const res = await fetch(`${baseUrl}chat/msg/${roomId}`);
+    async ({ roomId, userId }) => {
+        const res = await fetch(`${baseUrl}chat/msg/${roomId}/${userId}`);
         const data = await res.json();
         return { roomId, msgs: data };
     }
@@ -29,6 +29,10 @@ const chatSlice = createSlice({
             const { roomId, msg } = action.payload;
             state.msgByRoom[roomId] = state.msgByRoom[roomId] || [];
             state.msgByRoom[roomId].push(msg);
+        },
+        resetChat(state) {
+            state.curRoomId = null;
+            state.msgByRoom = {};
         }
     },
     extraReducers: (builder) => {
@@ -39,5 +43,5 @@ const chatSlice = createSlice({
     }
 })
 
-export const { switchRoom, addMsg } = chatSlice.actions;
+export const { switchRoom, addMsg, resetChat } = chatSlice.actions;
 export default chatSlice;

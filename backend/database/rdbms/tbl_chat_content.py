@@ -4,14 +4,18 @@ class Tbl_ChatContent(ChatRDBMS):
     # chat content table
     table_name = "chat_content"
 
-    def find_chat_content_by_room_id(self, room_id: int) -> list:
+    def find_chat_content_by_room_id(self, room_id: int, user_id: int) -> list:
         # 使用 room id 搜尋對話訊息
-        sql = " SELECT id, room_id, sender_id, content, send_datetime, is_delete "
-        sql += f" FROM {self.table_name} "
-        sql += " WHERE room_id = %s "
-        sql += " ORDER BY send_datetime ASC "
+        sql = f"""
+            SELECT a.id, a.room_id, a.sender_id, a.content, a.send_datetime, a.is_delete, b.username
+            FROM {self.table_name} AS a
+            INNER JOIN users AS b
+            ON a.sender_id = b.id
+            WHERE a.room_id = %s AND a.sender_id = %s
+            ORDER BY a.send_datetime ASC
+        """
 
-        result = self.select_all(sql=sql, datas=[room_id])
+        result = self.select_all(sql=sql, datas=[room_id, user_id])
         return result
     
     def insert_chat_content(self, room_id: int, sender_id: int, content: str) -> None:

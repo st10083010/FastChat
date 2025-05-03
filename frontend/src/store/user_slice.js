@@ -48,8 +48,12 @@ const userSlice = createSlice({
             state.userInfo = null;
             state.isLoggedIn = false;
         },
-        setAcessToken(state, action) {
+        setAccessToken(state, action) {
             state.access_token = action.payload;
+        },
+        setUserInfo(state, action) {
+            state.userInfo = action.payload;
+            state.isLoggedIn = true;
         }
     },
     extraReducers: (builder) => {
@@ -76,5 +80,5 @@ const userSlice = createSlice({
     }
 });
 
-export const { cleanUser } = userSlice.actions;
+export const { cleanUser, setAccessToken, setUserInfo } = userSlice.actions;
 export default userSlice;

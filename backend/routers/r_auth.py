@@ -31,7 +31,12 @@ async def login_user(login_user: Users):
     result = {
         "code": 1,
         "msg": "login Successful.",
-        "access_token": ""
+        "access_token": "",
+        "user_info": {
+            "id": 0,
+            "username": "",
+            "email": ""
+        }
     }
 
     plain_text_pw = login_user.password
@@ -39,6 +44,7 @@ async def login_user(login_user: Users):
 
     # 查詢使用者
     user_info = tbl_users.find_an_user_by_email(login_user.email)
+    print(user_info)
 
     # 驗證密碼
     ph = PasswordHasher()
@@ -57,6 +63,10 @@ async def login_user(login_user: Users):
     })
 
     result['access_token'] = token
+    result['user_info']['id'] = user_info['id']
+    result['user_info']['username'] = user_info['username']
+    result['user_info']['email'] = user_info['email']
+
     res = JSONResponse(content=result)
 
     # TODO: 正式上線時須注意設定
