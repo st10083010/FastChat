@@ -35,3 +35,14 @@ class Tbl_Users(ChatRDBMS):
 
         result = self.select_one(sql=sql, datas=[int_user_id])
         return result
+    
+    def find_a_user_by_username(self, username: str):
+        # 透過 username 尋找使用者
+        sql = f"""
+            SELECT id, username, email
+            FROM {self.table_name}
+            WHERE username LIKE %s
+        """
+
+        result = self.select_one(sql=sql, datas=[username])
+        return result

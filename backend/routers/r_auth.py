@@ -71,7 +71,7 @@ async def login_user(login_user: Users):
 
     # TODO: 正式上線時須注意設定
     res.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", secure=False, path="/")
-    return result
+    return res
 
 @auth.post("/logout")
 async def logout_user(response: Response):

@@ -3,7 +3,7 @@ import { baseUrl } from '../configs/config';
 
 // 定義初始狀態
 const initState = {
-    curRoomId: '1',
+    curRoomId: '0',
     msgByRoom: {}
 };
 

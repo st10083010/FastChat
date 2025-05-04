@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, Request, HTTPException
+from fastapi import Depends, APIRouter, Request, HTTPException, Query
 from backend.handlers.hd_cores import HD_Cores
 from backend.database.rdbms.tbl_users import Tbl_Users
 
@@ -6,6 +6,7 @@ info = APIRouter(prefix="/info", tags=["Personal Information"])
 
 @info.get("/me")
 def read_me(cur_user=Depends(HD_Cores.get_cur_user_by_req)):
+    # 個人頁面
     return cur_user
 
 @info.get("/who_am_i")
@@ -29,5 +30,13 @@ def who_am_i(req: Request):
         "username": user["username"],
         "email": user['email']
     }
+
+    return result
+
+@info.get("/find")
+def find_a_user(user: str = Query(...)):
+    # 尋找特定用戶並取得該用戶資訊
+    target_user = user.strip()
+    result = Tbl_Users.find_a_user_by_username(username=target_user)
 
     return result

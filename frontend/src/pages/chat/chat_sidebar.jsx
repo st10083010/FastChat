@@ -9,11 +9,20 @@ const ChatSidebar = () => {
 
     const onRoomClick = ({ key }) => {
         // 聊天室被點擊時
-        dispatch(switchRoom(key)); // 使用 dispatch 發出 action 並執行定義好的操作
-        dispatch(fetchMsgs({ roomId: key, userId }));
+        const roomId = parseInt(key);
+        dispatch(switchRoom(roomId)); // 使用 dispatch 發出 action 並切換 room id
+
+        if (roomId > 0) {
+            // 首頁時不抓資料，避免後端出錯
+            dispatch(fetchMsgs({ roomId, userId }));
+        }        
     }
 
     const items = [
+        {
+            label: '首頁',
+            key: '0'
+        },
         {
             label: '聊天室 A',
             key: '1'
@@ -25,7 +34,10 @@ const ChatSidebar = () => {
     ];
 
     return (
-        <Menu items={items} onClick={onRoomClick} selectedKeys={[curRoomId]} />
+        <>
+            <div style={{ height: '100px', color: 'white' }}>Logo</div>
+            <Menu items={items} onClick={onRoomClick} selectedKeys={[curRoomId]} />
+        </>
     )
 }
 

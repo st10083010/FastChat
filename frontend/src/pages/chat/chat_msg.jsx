@@ -2,7 +2,6 @@ import { useSelector } from 'react-redux';
 
 const ChatMsg = () => {
     const { curRoomId, msgByRoom } = useSelector((state) => state.chat);
-    // const { userId, username } = useSelector((state) => state.user.userInfo);
     const msgs = msgByRoom[curRoomId] || [];
 
     return (

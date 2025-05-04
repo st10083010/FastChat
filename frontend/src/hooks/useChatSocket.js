@@ -11,7 +11,7 @@ export const useChatSocket = (roomId) => {
     const token = useSelector(state => state.user.access_token);
 
     useEffect(() => {
-        if (!roomId) return;
+        if (!roomId || !token) return; // 等待 token 有值，避免重新整理後尚未取得 token 就直接對後端發出請求
 
         const socket = new WebSocket(`${wsBaseHost}chat/ws/${roomId}?token=${token}`);
         socketRef.current = socket;
