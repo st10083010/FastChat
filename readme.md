@@ -35,3 +35,8 @@ http://127.0.0.1:8000/docs
 
 **ReDoc API**  
 http://127.0.0.1:8000/redoc
+
+## Tech Stack
+- 後端：Python, FastAPI
+- 前端：React, Redux, Ant Design
+- 資料庫：MySQL
