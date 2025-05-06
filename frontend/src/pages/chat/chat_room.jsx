@@ -22,15 +22,15 @@ const ChatRoom = () => {
                     <ChatHeader />
                 </Header>
                 <Content style={{ padding: '16px', display: "flex", flexDirection: 'column', flex: 1 }}>
-                    { curRoomId == 0 ? (
-                        <ChatHome />
-                    ) : (
+                    { parseInt(curRoomId) > 0 ? (
                         <>
                             <div style={{ flex: 1, overflowY: 'auto' }}>
                                 <ChatMsg />
                             </div>
                             <ChatInput />
                         </>
+                    ) : (
+                        <ChatHome />
                     )}
                 </Content>
             </Layout>
