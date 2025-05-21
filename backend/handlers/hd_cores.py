@@ -20,7 +20,7 @@ class HD_Cores():
     @staticmethod
     def decode_access_token(hashed_token: str) -> dict:
         # TODO: 處理解析失敗
-        payload = jwt.decode(hashed_token, SECRET_KEY, algorithms=ALGORITHM)
+        payload = jwt.decode(hashed_token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     
     @staticmethod
@@ -34,6 +34,9 @@ class HD_Cores():
             raise HTTPException(status_code=401, detail="Invalid token")
         
         user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="user_id token")
+
         user_info = Tbl_Users().find_an_user_by_id(user_id=user_id)
 
         if not user_info:

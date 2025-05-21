@@ -45,7 +45,7 @@ class ChatRDBMS():
             c.execute(sql, tuple(datas))
             self.conn.commit()
 
-    def select_one(self, sql: str, datas: list[str]):
+    def select_one(self, sql: str, datas: list[str | int]):
         result = None
         with self.conn.cursor() as c:
             c.execute(sql, tuple(datas))
@@ -54,12 +54,12 @@ class ChatRDBMS():
 
         return result
     
-    def update_one(self, sql: str, datas: list[str]):
+    def update_one(self, sql: str, datas: list[str | int]):
         with self.conn.cursor() as c:
             c.execute(sql, tuple(datas))
             self.conn.commit()
 
-    def select_all(self, sql: str, datas: list[str]):
+    def select_all(self, sql: str, datas: list[str | int]):
         result = None
         with self.conn.cursor() as c:
             c.execute(sql, tuple(datas))

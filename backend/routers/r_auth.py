@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Response
+from fastapi import APIRouter, status, Response, HTTPException
 from fastapi.responses import JSONResponse
 from backend.schemas.users import Register, Users
 from argon2 import PasswordHasher
@@ -44,7 +44,9 @@ async def login_user(login_user: Users):
 
     # 查詢使用者
     user_info = tbl_users.find_an_user_by_email(login_user.email)
-    print(user_info)
+    if user_info is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    # print(user_info)
 
     # 驗證密碼
     ph = PasswordHasher()

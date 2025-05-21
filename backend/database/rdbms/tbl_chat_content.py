@@ -4,7 +4,7 @@ class Tbl_ChatContent(ChatRDBMS):
     # chat content table
     table_name = "chat_content"
 
-    def find_chat_content_by_room_id(self, room_id: int, user_id: int) -> list:
+    def find_chat_content_by_room_id(self, room_id: int, user_id: int) -> tuple:
         # 使用 room id 搜尋對話訊息
         sql = f"""
             SELECT a.id, a.room_id, a.sender_id, a.content, a.send_datetime, a.is_delete, b.username

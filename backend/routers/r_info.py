@@ -21,6 +21,9 @@ def who_am_i(req: Request):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid user_id")
+    
     user = Tbl_Users().find_an_user_by_id(user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -37,6 +40,6 @@ def who_am_i(req: Request):
 def find_a_user(user: str = Query(...)):
     # 尋找特定用戶並取得該用戶資訊
     target_user = user.strip()
-    result = Tbl_Users.find_a_user_by_username(username=target_user)
+    result = Tbl_Users().find_a_user_by_username(username=target_user)
 
     return result

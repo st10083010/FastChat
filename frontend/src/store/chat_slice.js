@@ -3,6 +3,7 @@ import { baseUrl } from '../configs/config';
 
 // 定義初始狀態
 const initState = {
+    currentView: 'home', // 當前顯示畫面控制: home | chat | game
     curRoomId: '0',
     msgByRoom: {}
 };
@@ -22,8 +23,12 @@ const chatSlice = createSlice({
     name: 'chat',
     initialState: initState,
     reducers: {
+        switchView(state, action) {
+            state.currentView = action.payload;
+        },
         switchRoom(state, action) {
             state.curRoomId = action.payload;
+            state.currentView = 'chat';
         },
         addMsg(state, action) {
             const { roomId, msg } = action.payload;
@@ -33,6 +38,7 @@ const chatSlice = createSlice({
         resetChat(state) {
             state.curRoomId = null;
             state.msgByRoom = {};
+            state.currentView = 'chat';
         }
     },
     extraReducers: (builder) => {
@@ -43,5 +49,5 @@ const chatSlice = createSlice({
     }
 })
 
-export const { switchRoom, addMsg, resetChat } = chatSlice.actions;
+export const { switchRoom, addMsg, resetChat, switchView } = chatSlice.actions;
 export default chatSlice;
