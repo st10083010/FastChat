@@ -1,58 +1,43 @@
-import { useRef, useEffect } from 'react';
+import Phaser from 'phaser';
 
-const GameScene = ({ enclosures, setSelectedEnclosureIndex }) => {
-    // 遊戲畫面
-    const canvasRef = useRef(null);
-    const canvasWidth = 1024;
-    const canvasHeight = 576;
+export default class GameScene extends Phaser.Scene {
+    constructor() {
+        super('GameScene');
+    }
 
-    const draw = (ctx) => {
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-        ctx.fillStyle = '#2d4a73';
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    preload() {
+        // 載入背景圖
+        this.load.image('bg_room', '/assets/bg_room.png');
 
-        enclosures.forEach((en) => {
-            ctx.fillStyle = '#333';
-            ctx.fillRect(en.x, en.y, 48, 48);
-            ctx.fillStyle = 'white';
-            ctx.fillText('E', en.x + 18, en.y + 30);
+        // 載入角鋼架
+        this.load.image('angel_frame', '/assets/angel_frame.png');
+    }
+
+    create() {
+        // 畫背景
+        this.add.image(512, 288, 'bg_room').setOrigin(0.5, 0.5);
+
+        // 畫角鋼架
+        this.angelFrame = this.add.image(160, 256, 'angel_frame').setOrigin(0, 0);
+        this.angelFrame.setInteractive();
+
+        this.angelFrame.on('pointerdown', () => {
+            console.log('Clicked Angel Frame');
         });
-    };
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
+        // 初始化飼育箱 group
+        this.enclosures = this.add.group();
 
-        const loop = () => {
-            draw(ctx);
-            requestAnimationFrame(loop);
-        };
-        loop();
+        // 範例：建立一個飼育箱
+        const enclosure = this.add.rectangle(400, 400, 48, 48, 0x333333).setInteractive();
+        enclosure.on('pointerdown', () => {
+            console.log('點擊了飼育箱');
+            // 這裡可呼叫外部 function 例如 setSelectedEnclosureIndex
+        });
+        this.enclosures.add(enclosure);
+    }
 
-        const handleClick = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            enclosures.forEach((en, index) => {
-                if (x >= en.x && x <= en.x + 48 && y >= en.y && y <= en.y + 48) {
-                    setSelectedEnclosureIndex(index);
-                }
-            });
-        };
-
-        canvas.addEventListener('click', handleClick);
-        return () => canvas.removeEventListener('click', handleClick);
-    }, [enclosures]);
-
-    return (
-        <canvas
-            ref={canvasRef}
-            width={canvasWidth}
-            height={canvasHeight}
-            style={{ border: '1px solid black' }}
-        />
-    );
-};
-
-export default GameScene;
+    update(time, delta) {
+        // 每幀更新邏輯
+    }
+}
