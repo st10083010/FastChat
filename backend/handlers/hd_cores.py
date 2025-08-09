@@ -4,6 +4,7 @@ import jwt
 from backend.token import SECRET_KEY, ALGORITHM
 from fastapi import Request, HTTPException
 from backend.database.rdbms.tbl_users import Tbl_Users
+from backend.configs.security import ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS
 
 class HD_Cores():
     @staticmethod
@@ -12,8 +13,8 @@ class HD_Cores():
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-        to_encode.update({"exp": expire})
+            expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_TTL_SECONDS)
+        to_encode.update({"exp": expire, "typ": "access"})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
     
@@ -21,6 +22,7 @@ class HD_Cores():
     def decode_access_token(hashed_token: str) -> dict:
         # TODO: 處理解析失敗
         payload = jwt.decode(hashed_token, SECRET_KEY, algorithms=[ALGORITHM])
+        # print(f"payload: {payload}")
         if payload.get("typ") != "access":
             raise HTTPException(status_code=401, detail="Invalid access token")
         return payload
@@ -31,7 +33,7 @@ class HD_Cores():
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(days=7)
+            expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_TTL_SECONDS)
 
         to_encode.update({"exp": expire, "typ": "refresh"})
         encoded_jwt_refresh = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

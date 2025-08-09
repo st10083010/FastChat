@@ -29,7 +29,7 @@ export const useApiFetch = () => {
         });
 
         if (!r.ok) {
-            navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+            navigate('/login');
             return res;
         }
 

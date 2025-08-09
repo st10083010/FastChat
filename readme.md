@@ -25,9 +25,20 @@ cd frontend
 npm run dev
 ```
 
-後端
+後端 linux
 ```shell
-uvicorn main:app --reload
+# 開發
+ENV=dev uvicorn main:app --reload
+# 測試
+ENV=test uvicorn main:app --reload
+# 正式
+ENV=prod uvicorn main:app
+```
+
+後端 windows
+```powershell
+# 開發
+$env:ENV="dev"; uvicorn main:app --reload
 ```
 
 API文件  
@@ -38,6 +49,7 @@ http://127.0.0.1:8000/docs
 http://127.0.0.1:8000/redoc
 
 ## Tech Stack
+- 遊戲開發：Phaser.js
 - 後端：Python, FastAPI
 - 前端：React, Redux, Ant Design
 - 資料庫：MySQL
