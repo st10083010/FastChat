@@ -1,29 +1,28 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { addMsg } from '../store/chat_slice';
 import { setAccessToken } from '../store/user_slice';
 import { baseUrl, headers, wsBaseHost } from '../configs/config';
 
 export const useChatSocket = (roomId) => {
-    const socketRef = useRef(null);
-    const retryRef = useRef(0); // 指數回退用
+    const socketRef = useRef(null); // 保存當前ws連線物件
+    const retryRef = useRef(0); // 記錄斷線後重連的次數
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const username = useSelector((s) => s.user.userInfo?.username);
     const userId = useSelector((s) => s.user.userInfo?.id);
+    const accessToken = useSelector((s) => s.user.access_token);   // 依你的 slice 命名
 
-    // 注意：如果 slice 是 access_token（底線），改成 s.user.access_token
-    const accessToken = useSelector((s) => s.user.accessToken);
-
+    // 刷新 access token
     const refreshAccess = useCallback(async () => {
         const r = await fetch('/auth/refresh', {
             method: 'POST',
-            credentials: 'include' // 讓瀏覽器自動帶上 HttpOnly refresh cookie
+            credentials: 'include'
         });
         if (!r.ok) {
-            navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+            navigate('/login');
             throw new Error('refresh_failed');
         }
         const data = await r.json();
@@ -36,49 +35,49 @@ export const useChatSocket = (roomId) => {
     const connect = useCallback(async () => {
         if (!roomId || !accessToken) return;
 
-        // 建立連線
-        const ws = new WebSocket(
-            `${wsBaseHost}chat/ws/${roomId}?token=${accessToken}`
-        );
+        const ws = new WebSocket(`${wsBaseHost}chat/ws/${roomId}?token=${accessToken}`);
         socketRef.current = ws;
 
+        // 連線成功，重連次數歸零
         ws.onopen = () => {
-            retryRef.value = 0;
+            retryRef.current = 0;
         };
 
+        // 處理收到的訊息
         ws.onmessage = (ev) => {
             try {
                 const data = JSON.parse(ev.data);
-                // 後端 WS 目前是原樣轉發，這裡直接丟進 chat store
                 dispatch(addMsg({ roomId, msg: data }));
             } catch {
-                // ignore parse error
+                // 格式不正確就不傳送到後端並忽略
             }
         };
 
+        // 關閉連線
         ws.onclose = async (ev) => {
-            // Token 過期或無效 → 先刷新、再重連
             if (ev.code === 4001) {
+                // token 過期
                 try {
                     await refreshAccess();
-                    // 立刻重連
-                    setTimeout(connect, 0);
+                    setTimeout(connect, 0); // 用新 access 立刻重連
                     return;
                 } catch {
-                    // refreshAccess 內已處理導頁
-                    return;
+                    return; // 已在 refreshAccess 內導回登入
                 }
             }
-
-            // 其它斷線：指數回退重連
-            const attempt = Math.min(retryRef.current + 1, 5);
-            retryRef.current = attempt;
-            const delay = Math.pow(2, attempt) * 250; // 500ms, 1s, 2s, 4s, 5s+
+            // 其它原因導致斷線，計算重連次數，避免對後端瘋狂請求
+            retryRef.current = Math.min(retryRef.current + 1, 5);
+            const delay = Math.pow(2, retryRef.current) * 250; // 計算指數回退重連
             setTimeout(connect, delay);
         };
 
+        // 錯誤處理
         ws.onerror = () => {
-            try { ws.close(); } catch {}
+            try {
+                ws.close(); 
+            } catch {
+                // 某些狀況下, WS已關閉或狀態錯誤，會丟出異常，使用try catch捕獲該錯誤
+            }
         };
     }, [roomId, accessToken, dispatch, refreshAccess]);
 
@@ -94,24 +93,22 @@ export const useChatSocket = (roomId) => {
     const sendMsg = useCallback(async (content) => {
         if (!roomId || !userId || !username) return;
 
-        // 1) 先經 REST 入庫（Header 帶 Access）
         try {
+            // 嘗試取得header的access token
             const h = new Headers(headers || {});
             if (accessToken) {
                 h.set('Authorization', `Bearer ${accessToken}`);
             }
 
+            // 訊息寫入資料庫
             const res = await fetch(`${baseUrl}chat/msg/${roomId}`, {
                 method: 'POST',
                 headers: h,
-                credentials: 'include', // 帶 cookie 以便將來需要
-                body: JSON.stringify({
-                    sender_id: userId,
-                    content
-                })
+                credentials: 'include',
+                body: JSON.stringify({ sender_id: userId, content })
             });
 
-            // 401 → 嘗試刷新後重放一次
+            // 處理 access token 過期的狀況
             if (res.status === 401) {
                 const newAccess = await refreshAccess();
                 const h2 = new Headers(headers || {});
@@ -120,12 +117,11 @@ export const useChatSocket = (roomId) => {
                     method: 'POST',
                     headers: h2,
                     credentials: 'include',
-                    body: JSON.stringify({
-                        sender_id: userId,
-                        content
-                    })
+                    body: JSON.stringify({ sender_id: userId, content })
                 });
+
                 if (!res2.ok) {
+                    // TODO: 訊息寫入失敗，要想一下要做什麼處理
                     console.log('訊息寫入失敗（重試後）');
                 }
             } else if (!res.ok) {
@@ -135,10 +131,10 @@ export const useChatSocket = (roomId) => {
             console.log('Err: ', err);
         }
 
-        // 2) 用 WS 廣播給線上其他人（沿用你原本後端的「原樣轉發」）
+        // WS 即時廣播訊息
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({
-                id: Date.now(),          // 前端臨時 id，等 REST 撈回真 id 再對齊
+                id: Date.now(),
                 room_id: roomId,
                 sender_id: userId,
                 username,

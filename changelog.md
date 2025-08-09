@@ -1,5 +1,6 @@
 ## Change Log
 ### 2025
+ - 08-09 修復BUG: import 來源錯誤
  - 08-09 修改聊天室功能，把token從cookie移到header中(待測試); 新增refresh token，避免token過期
  - 07-02 改用Phaser.js進行開發，並增加部分美術圖
  - 05-21 增加小遊戲與互動初步設計
