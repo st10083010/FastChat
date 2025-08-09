@@ -12,7 +12,7 @@ class HD_Cores():
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=60)
+            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
@@ -21,21 +21,43 @@ class HD_Cores():
     def decode_access_token(hashed_token: str) -> dict:
         # TODO: 處理解析失敗
         payload = jwt.decode(hashed_token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("typ") != "access":
+            raise HTTPException(status_code=401, detail="Invalid access token")
+        return payload
+    
+    @staticmethod
+    def create_refresh_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.now(timezone.utc) + expires_delta
+        else:
+            expire = datetime.now(timezone.utc) + timedelta(days=7)
+
+        to_encode.update({"exp": expire, "typ": "refresh"})
+        encoded_jwt_refresh = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return encoded_jwt_refresh
+    
+    @staticmethod
+    def decode_refresh_token(hashed_token: str) -> dict:
+        payload = jwt.decode(hashed_token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("typ") != "refresh":
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
         return payload
     
     @staticmethod
     def get_cur_user_by_req(req: Request) -> dict:
-        token = req.cookies.get("access_token")
-        if token is None:
-            raise HTTPException(status_code=401, detail="Not authenticated")
+        auth = req.headers.get("Authorization")
+        if not auth or not auth.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing Authorization")
         
+        token = auth.split(" ", 1)[1]
         payload = HD_Cores.decode_access_token(token)
         if payload is None:
             raise HTTPException(status_code=401, detail="Invalid token")
         
         user_id = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=401, detail="user_id token")
+            raise HTTPException(status_code=401, detail="Invalid token payload")
 
         user_info = Tbl_Users().find_an_user_by_id(user_id=user_id)
 

@@ -13,7 +13,8 @@ room_connections: dict[str, list[WebSocket]] = {}
 def get_msgs(room_id: int, user_id: int, table=Depends(get_table(Tbl_ChatContent))):
     # 取得訊息
     result = table.find_chat_content_by_room_id(room_id, user_id)
-    print("GET MSG: ", result)
+    # user_id僅在必要時做權限驗證，不參與聊天訊息查詢
+    # print("GET MSG: ", result)
 
     return result
 
@@ -29,14 +30,19 @@ def post_msg(room_id: int, msg: MsgIn, table=Depends(get_table(Tbl_ChatContent))
 
 @chat.websocket("/ws/{room_id}")
 async def ws_endpoint(websocket: WebSocket, room_id: str, token: str = Query(...)):
-    payload = HD_Cores.decode_access_token(token)
-    if payload is None:
-        # 沒通過身份驗證
-        await websocket.close(code=1008)
+    # token 與身分驗證
+    try:
+        payload = HD_Cores.decode_access_token(token)
+        if payload is None:
+            # 沒通過身份驗證
+            await websocket.close(code=1008)
+            return
+
+    except Exception:
+        await websocket.close(code=4001)  # 自訂：token_expired / invalid
         return
 
     await websocket.accept()
-
 
     # 將此用戶加入對應房間的連線清單
     if room_id not in room_connections:

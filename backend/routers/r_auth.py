@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Response, HTTPException
+from fastapi import APIRouter, status, Response, HTTPException, Request
 from fastapi.responses import JSONResponse
 from backend.schemas.users import Register, Users
 from argon2 import PasswordHasher
@@ -29,8 +29,8 @@ async def register_user(register_user: Register, response: Response):
 async def login_user(login_user: Users):
     # TODO: 錯誤處理
     result = {
-        "code": 1,
-        "msg": "login Successful.",
+        "code": 0,
+        "msg": "login failed.",
         "access_token": "",
         "user_info": {
             "id": 0,
@@ -60,28 +60,45 @@ async def login_user(login_user: Users):
         new_hashed_pw = ph.hash(plain_text_pw)
         tbl_users.update_user_password_hash_value(new_hashed_pw=new_hashed_pw, user_id=user_info['id'])
 
-    token = HD_Cores.create_access_token({
-        "sub": str(user_info['id'])
-    })
+    payload = {"sub": str(user_info['id'])}
+    access = HD_Cores.create_access_token(payload) # 15 mins
+    refresh = HD_Cores.create_refresh_token(payload) # 7 days
 
-    result['access_token'] = token
+    result["code"] = 1
+    result['msg'] = "login Successful."
+    result['access_token'] = access
     result['user_info']['id'] = user_info['id']
     result['user_info']['username'] = user_info['username']
     result['user_info']['email'] = user_info['email']
 
     res = JSONResponse(content=result)
 
-    # TODO: 正式上線時須注意設定
-    res.set_cookie(key="access_token", value=token, httponly=True, samesite="lax", secure=False, path="/")
+    res.set_cookie("refresh_token", refresh, httponly=True, samesite="lax", secure=False, path="/auth")
     return res
 
 @auth.post("/logout")
 async def logout_user(response: Response):
     # 登出使用者
-    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token", path="/auth")
+
     result = {
         "code": 1,
         "msg": "Logged out"
     }
 
     return result
+
+@auth.post("/refresh")
+async def refresh_token(request: Request, response: Response):
+    rt = request.cookies.get("refresh_token")
+    if not rt:
+        raise HTTPException(status_code=401, detail="no_refresh")
+    try:
+        payload = HD_Cores.decode_refresh_token(rt)
+    except Exception:
+        raise HTTPException(status_code=401, detail="refresh_invalid")
+
+    new_access = HD_Cores.create_access_token({"sub": payload["sub"]})
+    new_refresh = HD_Cores.create_refresh_token({"sub": payload["sub"]})
+    response.set_cookie("refresh_token", new_refresh, httponly=True, samesite="lax", secure=False, path="/auth")
+    return {"access_token": new_access, "token_type": "bearer", "expires_in": 900}

@@ -11,11 +11,11 @@ class Tbl_ChatContent(ChatRDBMS):
             FROM {self.table_name} AS a
             INNER JOIN users AS b
             ON a.sender_id = b.id
-            WHERE a.room_id = %s AND a.sender_id = %s
+            WHERE a.room_id = %s
             ORDER BY a.send_datetime ASC
         """
 
-        result = self.select_all(sql=sql, datas=[room_id, user_id])
+        result = self.select_all(sql=sql, datas=[room_id])
         return result
     
     def insert_chat_content(self, room_id: int, sender_id: int, content: str) -> None:

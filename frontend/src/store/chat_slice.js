@@ -27,13 +27,14 @@ const chatSlice = createSlice({
             state.currentView = action.payload;
         },
         switchRoom(state, action) {
-            state.curRoomId = action.payload;
+            state.curRoomId = String(action.payload);
             state.currentView = 'chat';
         },
         addMsg(state, action) {
             const { roomId, msg } = action.payload;
-            state.msgByRoom[roomId] = state.msgByRoom[roomId] || [];
-            state.msgByRoom[roomId].push(msg);
+            let strRoomId = String(roomId);
+            state.msgByRoom[strRoomId] = state.msgByRoom[strRoomId] || [];
+            state.msgByRoom[strRoomId].push(msg);
         },
         resetChat(state) {
             state.curRoomId = null;
@@ -44,7 +45,7 @@ const chatSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(fetchMsgs.fulfilled, (state, action) => {
             const { roomId, msgs } = action.payload;
-            state.msgByRoom[roomId] = msgs;
+            state.msgByRoom[String(roomId)] = msgs;
         })
     }
 })
