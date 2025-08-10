@@ -1,148 +1,132 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
 import { addMsg } from '../store/chat_slice';
-import { setAccessToken } from '../store/user_slice';
-import { baseUrl, headers, wsBaseHost } from '../configs/config';
+import { v4 as uuidv4 } from 'uuid';
+import { wsBaseHost, baseUrl, headers } from '../configs/config';
+import { useApiFetch } from './useApiFetch';
 
 export const useChatSocket = (roomId) => {
-    const socketRef = useRef(null); // 保存當前ws連線物件
-    const retryRef = useRef(0); // 記錄斷線後重連的次數
+    // 處理 WS 的連線、斷開、廣播、發送訊息到資料庫與異常處理
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+    const { apiFetch } = useApiFetch();
 
-    const username = useSelector((s) => s.user.userInfo?.username);
-    const userId = useSelector((s) => s.user.userInfo?.id);
-    const accessToken = useSelector((s) => s.user.access_token);   // 依你的 slice 命名
+    const accessToken = useSelector(s => s.user.access_token);
+    const userId = useSelector(s => s.user.userInfo?.id);
+    const username = useSelector(s => s.user.userInfo?.username);
+    const curView = useSelector(s => s.chat.currentView);
 
-    // 刷新 access token
-    const refreshAccess = useCallback(async () => {
-        const r = await fetch('/auth/refresh', {
-            method: 'POST',
-            credentials: 'include'
-        });
-        if (!r.ok) {
-            navigate('/login');
-            throw new Error('refresh_failed');
+    // 判斷是否連線的條件
+    const isAuthed = Boolean(accessToken && userId);
+    // 處理切頁等UI操作的 WS 斷開與否，但不即時更新，只在渲染時會是新值，受閉包影響
+    const shouldConnect = Boolean(isAuthed && curView === 'chat' && roomId);
+
+    const socketRef = useRef(null); // 當前 WS 連線物件
+    const reconnectTimerRef = useRef(null); // 存放 setTimerout ID, 可以取消重新連接
+    const shouldConnectRef = useRef(false); // 給 WS 事件 callback 即時讀取最新布林值的物件且不受閉包影響
+
+    const clearTimer = useCallback(() => {
+        // 清除 timer
+        if (reconnectTimerRef.current) {
+            clearTimeout(reconnectTimerRef.current);
+            reconnectTimerRef.current = null;
         }
-        const data = await r.json();
-        if (data?.access_token) {
-            dispatch(setAccessToken(data.access_token));
+    }, []);
+
+    const hardClose = useCallback(() => {
+        // 強制斷開
+        try {
+            if (socketRef.current) {
+                socketRef.current.onopen = null;
+                socketRef.current.onmessage = null;
+                socketRef.current.onclose = null;
+                socketRef.current.onerror = null;
+                socketRef.current.close();
+            }
+        } catch (e) {
+            console.log(`hardClose error: ${e}`);
         }
-        return data.access_token;
-    }, [dispatch, navigate]);
 
-    const connect = useCallback(async () => {
-        if (!roomId || !accessToken) return;
+        socketRef.current = null;
+        clearTimer();
+    }, [clearTimer]);
 
-        const ws = new WebSocket(`${wsBaseHost}chat/ws/${roomId}?token=${accessToken}`);
+    const connect = useCallback(() => {
+        // 建立連線
+        if (!shouldConnectRef.current) return;
+
+        const url = `${wsBaseHost}chat/ws/${roomId}?token=${accessToken}`;
+        const ws = new WebSocket(url);
         socketRef.current = ws;
 
-        // 連線成功，重連次數歸零
-        ws.onopen = () => {
-            retryRef.current = 0;
-        };
-
-        // 處理收到的訊息
         ws.onmessage = (ev) => {
             try {
                 const data = JSON.parse(ev.data);
-                dispatch(addMsg({ roomId, msg: data }));
-            } catch {
-                // 格式不正確就不傳送到後端並忽略
+                dispatch(addMsg({ roomId, msg: data })); // 廣播訊息
+            } catch (e) {
+                console.log(`ws.onmessage error: ${e}`);
             }
         };
 
-        // 關閉連線
-        ws.onclose = async (ev) => {
-            if (ev.code === 4001) {
-                // token 過期
-                try {
-                    await refreshAccess();
-                    setTimeout(connect, 0); // 用新 access 立刻重連
-                    return;
-                } catch {
-                    return; // 已在 refreshAccess 內導回登入
-                }
-            }
-            // 其它原因導致斷線，計算重連次數，避免對後端瘋狂請求
-            retryRef.current = Math.min(retryRef.current + 1, 5);
-            const delay = Math.pow(2, retryRef.current) * 250; // 計算指數回退重連
-            setTimeout(connect, delay);
+        ws.onclose = () => {
+            if (!shouldConnectRef.current) return;
+            reconnectTimerRef.current = setTimeout(connect, 1500);
         };
-
-        // 錯誤處理
-        ws.onerror = () => {
-            try {
-                ws.close(); 
-            } catch {
-                // 某些狀況下, WS已關閉或狀態錯誤，會丟出異常，使用try catch捕獲該錯誤
-            }
-        };
-    }, [roomId, accessToken, dispatch, refreshAccess]);
+    }, [roomId, accessToken, dispatch]);
 
     useEffect(() => {
+        shouldConnectRef.current = shouldConnect;
+
+        if (!shouldConnect) {
+            hardClose();
+            return () => hardClose();
+        }
+        hardClose();
         connect();
-        return () => {
-            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-                socketRef.current.close();
-            }
-        };
-    }, [connect]);
+        return () => hardClose();
+    }, [shouldConnect, connect, hardClose]);
 
     const sendMsg = useCallback(async (content) => {
+        const ws = socketRef.current;
         if (!roomId || !userId || !username) return;
 
+        const clientId = uuidv4();
+        const local = {
+            id: undefined,
+            client_id: clientId,
+            room_id: roomId,
+            sender_id: userId,
+            username,
+            content,
+            local_ts: Date.now()
+        };
+
+        dispatch(addMsg({ roomId, msg: local })); // 不等待後端回應後廣播，而是即時廣播，減少延遲感
+
         try {
-            // 嘗試取得header的access token
             const h = new Headers(headers || {});
-            if (accessToken) {
-                h.set('Authorization', `Bearer ${accessToken}`);
-            }
+            h.set('Content-Type', 'application/json');
+            // Authorization 由 useApiFetch 內部自動補，不要在這裡手動塞 token
+            const res = await apiFetch(
+                `${baseUrl}chat/msg/${roomId}`,
+                { method: 'POST', headers: h, body: JSON.stringify({
+                    client_id: clientId,
+                    sender_id: userId,
+                    content
+                })}
+            );
 
-            // 訊息寫入資料庫
-            const res = await fetch(`${baseUrl}chat/msg/${roomId}`, {
-                method: 'POST',
-                headers: h,
-                credentials: 'include',
-                body: JSON.stringify({ sender_id: userId, content })
-            });
-
-            // 處理 access token 過期的狀況
-            if (res.status === 401) {
-                const newAccess = await refreshAccess();
-                const h2 = new Headers(headers || {});
-                h2.set('Authorization', `Bearer ${newAccess}`);
-                const res2 = await fetch(`${baseUrl}chat/msg/${roomId}`, {
-                    method: 'POST',
-                    headers: h2,
-                    credentials: 'include',
-                    body: JSON.stringify({ sender_id: userId, content })
-                });
-
-                if (!res2.ok) {
-                    // TODO: 訊息寫入失敗，要想一下要做什麼處理
-                    console.log('訊息寫入失敗（重試後）');
-                }
-            } else if (!res.ok) {
-                console.log('訊息寫入失敗');
-            }
-        } catch (err) {
-            console.log('Err: ', err);
+            console.log(`Res: ${res}`);
+            // 不用在這裡更新畫面；等後端（或自己）透過 WS 廣播回來，再由 reducer 以 client_id 對齊更新為正式
+        } catch (e) {
+            // 失敗：你可以在這裡做 retry 或標記失敗狀態（可選）
+            console.log('REST 入庫失敗：', e);
         }
 
-        // WS 即時廣播訊息
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            socketRef.current.send(JSON.stringify({
-                id: Date.now(),
-                room_id: roomId,
-                sender_id: userId,
-                username,
-                content,
-                send_datetime: new Date().toISOString()
-            }));
+        // WS 廣播給其他客戶端；自己這端 reducer 會用 client_id 去重複/更新
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(local));
         }
-    }, [roomId, userId, username, accessToken, refreshAccess]);
+    }, [apiFetch, roomId, userId, username, dispatch]);
 
     return { sendMsg };
 };

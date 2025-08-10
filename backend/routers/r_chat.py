@@ -25,7 +25,7 @@ def post_msg(room_id: int, msg: MsgIn, table=Depends(get_table(Tbl_ChatContent))
         "state": "success"
     }
 
-    table.insert_chat_content(room_id, msg.sender_id, msg.content)
+    table.insert_chat_content(room_id, msg.sender_id, msg.content, msg.client_id)
     return result
 
 @chat.websocket("/ws/{room_id}")

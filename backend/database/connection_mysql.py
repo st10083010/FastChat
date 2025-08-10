@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import pymysql
 import pymysql.cursors
+from typing import Any
 
 
 def read_env() -> str:
@@ -59,7 +60,7 @@ class ChatRDBMS():
             c.execute(sql, tuple(datas))
             self.conn.commit()
 
-    def select_all(self, sql: str, datas: list[str | int]):
+    def select_all(self, sql: str, datas: list[Any] | list):
         result = None
         with self.conn.cursor() as c:
             c.execute(sql, tuple(datas))

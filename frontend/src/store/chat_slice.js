@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { baseUrl } from '../configs/config';
+import { msgKey } from '../utils/msg_key';
 
 // 定義初始狀態
 const initState = {
@@ -33,8 +34,24 @@ const chatSlice = createSlice({
         addMsg(state, action) {
             const { roomId, msg } = action.payload;
             let strRoomId = String(roomId);
-            state.msgByRoom[strRoomId] = state.msgByRoom[strRoomId] || [];
-            state.msgByRoom[strRoomId].push(msg);
+            if (!state.msgByRoom[strRoomId]) {
+                state.msgByRoom[strRoomId] = []
+            }
+            
+            const arr = state.msgByRoom[strRoomId];
+            if (msg?.client_id) {
+                const i = arr.findIndex(m => m?.client_id && m.client_id === msg.client_id);
+                if (i !== -1) {
+                    // 找到那一筆並補上 id、時間等欄位
+                    arr[i] = { ...arr[i], ...msg };
+                    return;
+                }
+            }
+
+            // 沒 client_id 或找不到，檢查是否已存在，避免 WS 或歷史重覆
+            const mid = msgKey(msg);
+            const exists = arr.some(m => msgKey(m) === mid);
+            if (!exists) arr.push(msg);
         },
         resetChat(state) {
             state.curRoomId = null;

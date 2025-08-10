@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setAccessToken } from '../store/user_slice';
 
 export const useApiFetch = () => {
+    // 處理 token, 自動攜帶 Authorization, 遇到 401 先 refresh, 再重放原請求
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const access = useSelector((s) => s.user.accessToken);

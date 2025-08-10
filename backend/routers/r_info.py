@@ -1,6 +1,7 @@
 from fastapi import Depends, APIRouter, Request, HTTPException, Query
 from backend.handlers.hd_cores import HD_Cores
 from backend.database.rdbms.tbl_users import Tbl_Users
+from backend.schemas.users import UserQuery, UserQueryResult
 
 info = APIRouter(prefix="/info", tags=["Personal Information"])
 
@@ -36,10 +37,16 @@ def who_am_i(req: Request):
 
     return result
 
-@info.get("/find")
-def find_a_user(user: str = Query(...)):
-    # 尋找特定用戶並取得該用戶資訊
-    target_user = user.strip()
-    result = Tbl_Users().find_a_user_by_username(username=target_user)
+@info.get("/find", response_model=list[UserQueryResult])
+def find_a_user(req: Request, query: UserQuery = Depends()):
+    """尋找特定用戶並取得該用戶資訊"""
+    exclude_id = None
+    if query.exclude_self:
+        try:
+            me = HD_Cores.get_cur_user_by_req(req)
+            exclude_id = me.get("id") if me else None
+        except Exception:
+            pass
 
-    return result
+    rows = Tbl_Users().find_a_user_by_username(username=query.username.strip(), limit=query.limit, exclude_id=exclude_id)
+    return rows

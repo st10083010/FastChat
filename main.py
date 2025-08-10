@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.routers.r_auth import auth
 from backend.routers.r_info import info
 from backend.routers.r_chat import chat
+from backend.routers.r_chat_dm import dm
 
 app = FastAPI()
 
@@ -10,6 +11,7 @@ app = FastAPI()
 app.include_router(auth)
 app.include_router(info)
 app.include_router(chat)
+app.include_router(dm)
 
 # CORS
 origins = [

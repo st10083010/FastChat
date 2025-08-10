@@ -47,6 +47,7 @@ const userSlice = createSlice({
         cleanUser(state) {
             state.userInfo = null;
             state.isLoggedIn = false;
+            state.access_token = null;
         },
         setAccessToken(state, action) {
             state.access_token = action.payload;

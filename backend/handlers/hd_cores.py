@@ -48,6 +48,7 @@ class HD_Cores():
     
     @staticmethod
     def get_cur_user_by_req(req: Request) -> dict:
+        """取得當前登入的使用者資料(自己)"""
         auth = req.headers.get("Authorization")
         if not auth or not auth.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Missing Authorization")
