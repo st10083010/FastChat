@@ -115,7 +115,8 @@ export const useChatSocket = (roomId) => {
                 })}
             );
 
-            console.log(`Res: ${res}`);
+            console.log('res:');
+            console.log(res);
             // 不用在這裡更新畫面；等後端（或自己）透過 WS 廣播回來，再由 reducer 以 client_id 對齊更新為正式
         } catch (e) {
             // 失敗：你可以在這裡做 retry 或標記失敗狀態（可選）

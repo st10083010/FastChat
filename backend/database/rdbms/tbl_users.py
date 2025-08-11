@@ -39,7 +39,7 @@ class Tbl_Users(ChatRDBMS):
         # 透過 username 模糊搜尋使用者，並限制回傳筆數與排除特定使用者
         keyword = f"%{username}%"
         sql = f"""
-            SELECT id, username, email
+            SELECT id, username, email, last_log_out_datetime
             FROM {TableName.USERS.value}
             WHERE username LIKE %s
         """
@@ -49,7 +49,7 @@ class Tbl_Users(ChatRDBMS):
             sql += " AND id != %s "
             datas.append(int(exclude_id))
 
-        sql += " ORDER BY username ASC LIMIT %s "
+        sql += " ORDER BY username ASC, last_log_out_datetime DESC LIMIT %s "
         datas.append(int(limit))
 
         result = self.select_all(sql=sql, datas=datas)

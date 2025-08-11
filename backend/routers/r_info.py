@@ -2,6 +2,7 @@ from fastapi import Depends, APIRouter, Request, HTTPException, Query
 from backend.handlers.hd_cores import HD_Cores
 from backend.database.rdbms.tbl_users import Tbl_Users
 from backend.schemas.users import UserQuery, UserQueryResult
+from pprint import pprint
 
 info = APIRouter(prefix="/info", tags=["Personal Information"])
 
@@ -12,8 +13,8 @@ def read_me(cur_user=Depends(HD_Cores.get_cur_user_by_req)):
 
 @info.get("/who_am_i")
 def who_am_i(req: Request):
-    # 取得使用者資訊
-    token = req.cookies.get("access_token")
+    """取得使用者資訊"""
+    token = req.cookies.get("access_token") # TODO: cookie已經不放access_token
     if token is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -49,4 +50,6 @@ def find_a_user(req: Request, query: UserQuery = Depends()):
             pass
 
     rows = Tbl_Users().find_a_user_by_username(username=query.username.strip(), limit=query.limit, exclude_id=exclude_id)
+    # pprint(rows, sort_dicts=False)
+
     return rows

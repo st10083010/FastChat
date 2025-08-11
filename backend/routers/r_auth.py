@@ -80,6 +80,7 @@ async def login_user(login_user: Users):
 async def logout_user(response: Response):
     # 登出使用者
     response.delete_cookie("refresh_token", path="/auth")
+    # print(response.body)
 
     result = {
         "code": 1,

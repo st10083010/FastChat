@@ -25,6 +25,7 @@ def open_dm(target_id: int, me=Depends(HD_Cores.get_cur_user_by_req)):
         raise HTTPException(status_code=404, detail="使用者不存在")
 
     result = Tbl_DMRooms().create_dm_room_and_return_room_info(me['id'], target_id)
+    pprint(result, sort_dicts=False)
     if result is None:
         raise HTTPException(status_code=404, detail="私訊不存在")
 

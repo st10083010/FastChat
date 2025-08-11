@@ -6,7 +6,8 @@ import { msgKey } from '../utils/msg_key';
 const initState = {
     currentView: 'home', // 當前顯示畫面控制: home | chat | game
     curRoomId: '0',
-    msgByRoom: {}
+    msgByRoom: {},
+    dmListRecent: [] // 近期私訊列表
 };
 
 // 抓取聊天室資料，並讓 Redux 統一管理
@@ -16,6 +17,32 @@ export const fetchMsgs = createAsyncThunk(
         const res = await fetch(`${baseUrl}chat/msg/${roomId}/${userId}`);
         const data = await res.json();
         return { roomId, msgs: data };
+    }
+);
+
+export const fetchRecentDMs = createAsyncThunk(
+    // 取得最近15筆的私訊資訊
+    'chat/fetchRecentDMs',
+    async (_, { getState, rejectWithValue }) => {
+        try {
+            // react thunk中無法使用hook, 使用getState取得token
+            const state = getState();
+            const token = state.user.access_token;
+            const res = await fetch(`${baseUrl}chat/dm/recent`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include'
+            });
+            if (!res.ok) {
+                const err = await res.text().catch(() => '');
+                return rejectWithValue(err || 'fetchRecentDMs failed');
+            }
+            return await res.json();
+        } catch (e) {
+            return rejectWithValue(e?.message || 'fetchRecentDMs exception');
+        }
     }
 );
 
@@ -54,15 +81,20 @@ const chatSlice = createSlice({
             if (!exists) arr.push(msg);
         },
         resetChat(state) {
-            state.curRoomId = null;
+            state.curRoomId = '0';
             state.msgByRoom = {};
-            state.currentView = 'chat';
+            state.currentView = 'home';
+            state.dmListRecent = [];
         }
     },
     extraReducers: (builder) => {
         builder.addCase(fetchMsgs.fulfilled, (state, action) => {
             const { roomId, msgs } = action.payload;
             state.msgByRoom[String(roomId)] = msgs;
+        });
+
+        builder.addCase(fetchRecentDMs.fulfilled, (state, action) => {
+            state.dmListRecent = Array.isArray(action.payload) ? action.payload : [];
         })
     }
 })

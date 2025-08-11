@@ -9,6 +9,7 @@ import ChatRoom from "./pages/chat/chat_room";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { checkLogin } from "./store/user_slice";
+import { App as AntdApp } from "antd";
 
 // 路由處理
 
@@ -21,12 +22,14 @@ const App = () => {
     }, [dispatch])
 
     return (
-        <Routes>
-            <Route path="/" element={ <Home/> } />
-            <Route path="/register" element={ <Register /> } />
-            <Route path="/user_info" element={ <UserInfo />}/>
-            <Route path="/chat" element={ <ChatRoom /> }/>
-        </Routes>
+        <AntdApp>
+            <Routes>
+                <Route path="/" element={ <Home/> } />
+                <Route path="/register" element={ <Register /> } />
+                <Route path="/user_info" element={ <UserInfo />}/>
+                <Route path="/chat" element={ <ChatRoom /> }/>
+            </Routes>
+        </AntdApp>
     )
 };
 
