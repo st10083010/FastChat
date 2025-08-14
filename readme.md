@@ -9,12 +9,6 @@
 - [X] 單機聊天室
 - [X] 訊息儲存與聊天室紀錄讀取
 
-
-## TODOs
- - [ ] 一對一聊天功能
- - [ ] 群聊功能
- - [ ] 前端畫面優化、聊天室排序
-
 ## 預覽畫面
 https://www.youtube.com/watch?v=srZYuM2vlUk
 

@@ -24,10 +24,12 @@ const Login = () => {
 
         if (res.ok) {
             const responseBody = await res.json();
-            console.log(responseBody);
+            // console.log(responseBody.access_token);
             dispatch(setAccessToken(responseBody.access_token));
             dispatch(setUserInfo(responseBody.user_info));
-            navigate(`/chat?token=${responseBody.access_token}`);
+            localStorage.setItem('access_token', responseBody.access_token);
+
+            navigate('/chat');
         } else {
             // TODO: Error處理
             console.log("error");

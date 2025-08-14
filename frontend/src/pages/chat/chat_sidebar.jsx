@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { switchRoom, fetchMsgs, switchView, fetchRecentDMs } from '../../store/chat_slice';
 
 const ChatSidebar = () => {
+    // 聊天室側邊欄
     const dispatch = useDispatch();
     const curRoomId = useSelector((state) => state.chat.curRoomId); // 從 store 中取得資料
     const userId = useSelector(state => state.user.userInfo?.id);

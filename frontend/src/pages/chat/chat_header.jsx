@@ -16,6 +16,7 @@ const ChatHeader = () => {
         dispatch(logout());
         dispatch(cleanUser());
         dispatch(resetChat());
+        localStorage.removeItem('access_token');
         navigate("/");
     }
 

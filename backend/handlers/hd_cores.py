@@ -13,7 +13,7 @@ class HD_Cores():
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_TTL_SECONDS)
+            expire = datetime.now(timezone.utc) + timedelta(seconds=ACCESS_TOKEN_TTL_SECONDS)
         to_encode.update({"exp": expire, "typ": "access"})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
@@ -33,7 +33,7 @@ class HD_Cores():
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_TTL_SECONDS)
+            expire = datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_TTL_SECONDS)
 
         to_encode.update({"exp": expire, "typ": "refresh"})
         encoded_jwt_refresh = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -53,7 +53,7 @@ class HD_Cores():
         if not auth or not auth.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Missing Authorization")
         
-        token = auth.split(" ", 1)[1]
+        token = auth.split(" ", 1)[1].strip()
         payload = HD_Cores.decode_access_token(token)
         if payload is None:
             raise HTTPException(status_code=401, detail="Invalid token")

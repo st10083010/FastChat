@@ -91,6 +91,7 @@ async def logout_user(response: Response):
 
 @auth.post("/refresh")
 async def refresh_token(request: Request, response: Response):
+    """重新取得 access token"""
     rt = request.cookies.get("refresh_token")
     if not rt:
         raise HTTPException(status_code=401, detail="no_refresh")
