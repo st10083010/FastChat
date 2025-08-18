@@ -4,10 +4,17 @@
 
 此為個人開發專案，用以展示全端開發能力。專案仍持續開發中，並將逐步補上前後端優化與測試機制。
 
-## 功能概覽
-- [X] 使用者註冊 / 登入
-- [X] 單機聊天室
-- [X] 訊息儲存與聊天室紀錄讀取
+## 系統概覽
+1. 前端（React + Redux）
+ - Redux Store：管理使用者狀態、聊天室狀態
+ - useApiFetch：API 請求封裝，處理 access token / refresh token
+ - useChatSocket：WebSocket 封裝，負責即時訊息傳遞與重連
+ - UI：搜尋使用者、私訊清單、聊天室訊息、輸入框
+
+2. 後端（FastAPI）
+ - Auth 模組：登入/註冊，簽發與驗證 JWT（access + refresh）
+ - Chat 模組：私訊房間 API + WebSocket
+ - Info 模組：搜尋使用者、查詢個人資訊
 
 ## 預覽畫面
 https://www.youtube.com/watch?v=srZYuM2vlUk

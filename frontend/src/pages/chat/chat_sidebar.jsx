@@ -36,12 +36,10 @@ const ChatSidebar = () => {
         { label: '首頁', key: '0' },
         { label: 'Game', key: '-1' },
         { type: 'divider' },
-        { ...Array.isArray(dmListRecent) ?
-            dmListRecent.map((d, idx) => ({
-                label: d.peer.peer_username,
-                key: `${idx}-${d.peer.peer_id}`
-        })) : []
-     }
+        ...dmListRecent.map((d) => ({
+                label: `${d.peer_username}`,
+                key: `${d.room_id}`
+        }))
     ];
 
     return (

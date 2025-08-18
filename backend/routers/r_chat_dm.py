@@ -25,7 +25,7 @@ def open_dm(target_id: int, me=Depends(HD_Cores.get_cur_user_by_req)):
         raise HTTPException(status_code=404, detail="使用者不存在")
 
     result = Tbl_DMRooms().create_dm_room_and_return_room_info(me['id'], target_id)
-    pprint(result, sort_dicts=False)
+    # pprint(result, sort_dicts=False)
     if result is None:
         raise HTTPException(status_code=404, detail="私訊不存在")
 
@@ -37,14 +37,15 @@ def recent_dm(limit: int = Query(15, ge=1, le=50), me=Depends(HD_Cores.get_cur_u
     rows = Tbl_DMRooms().find_recent_rooms_for_user(me["id"], limit=limit)
 
     result = []
-    for r in rows:
-        item = {
-            "room_id": r["room_id"],
-            "last_at": r["last_at"],
-            "peer": {
+
+    if len(rows) > 0:
+        for r in rows:
+            item = {
+                "room_id": r["room_id"],
+                "last_at": r["last_at"],
                 "peer_id": r["peer_id"],
                 "peer_username": r["peer_username"]
             }
-        }
-        result.append(item)
+            result.append(item)
+
     return result
