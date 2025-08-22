@@ -4,7 +4,6 @@ import { msgKey } from '../utils/msg_key';
 
 // 定義初始狀態
 const initState = {
-    currentView: 'home', // 當前顯示畫面控制: home | chat | game
     curRoomId: '0',
     msgByRoom: {},
     dmListRecent: [] // 近期私訊列表
@@ -51,9 +50,6 @@ const chatSlice = createSlice({
     name: 'chat',
     initialState: initState,
     reducers: {
-        switchView(state, action) {
-            state.currentView = action.payload;
-        },
         switchRoom(state, action) {
             state.curRoomId = String(action.payload);
             state.currentView = 'chat';
@@ -99,5 +95,5 @@ const chatSlice = createSlice({
     }
 })
 
-export const { switchRoom, addMsg, resetChat, switchView } = chatSlice.actions;
+export const { switchRoom, addMsg, resetChat } = chatSlice.actions;
 export default chatSlice;

@@ -1,17 +1,11 @@
 import { useEffect } from 'react';
-import { Layout } from 'antd';
-import ChatSidebar from './chat_sidebar';
-import ChatHeader from './chat_header';
+import { Flex } from 'antd';
 import ChatMsg from './chat_msg';
 import ChatInput from './chat_input';
 import { useSelector, useDispatch } from 'react-redux';
-import ChatHome from './chat_home';
-import GameCanvas from './../game/game_canvas';
 import { useApiFetch } from '../../hooks/useApiFetch';
 import { baseUrl } from '../../configs/config';
 import { addMsg } from '../../store/chat_slice';
-
-const { Header, Sider, Content } = Layout;
 
 const ChatRoom = () => {
     const dispatch = useDispatch();
@@ -41,38 +35,16 @@ const ChatRoom = () => {
         })();
     }, [curView, curRoomId, userId, msgByRoom, apiFetch, dispatch]);
 
-    // 操控顯示畫面
-    let content;
-    if (curView === 'chat') {
-        content = (
-            <>
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                    <ChatMsg />
-                </div>
-                <ChatInput />
-            </>
-        );
-    } else if (curView === 'game') {
-        content = <GameCanvas />
-    } else {
-        content = <ChatHome />
-    }
-
     return (
-        <Layout style={{ height: '100vh', display: 'flex' }}>
-            <Sider width={200}>
-                <ChatSidebar />
-            </Sider>
+        <Flex vertical={true} style={{ flex: 1 }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+                <ChatMsg />
+            </div>
 
-            <Layout style={{ width: "100%" }}>
-                <Header style={{ padding: '0 16px' }}>
-                    <ChatHeader />
-                </Header>
-                <Content style={{ padding: '16px', display: "flex", flexDirection: 'column', flex: 1 }}>
-                    {content}
-                </Content>
-            </Layout>
-        </Layout>
+            <div style={{ borderTop: '1px solid #ddd', padding: '8px' }}>
+                <ChatInput />
+            </div>
+        </Flex>
     )
 }
 

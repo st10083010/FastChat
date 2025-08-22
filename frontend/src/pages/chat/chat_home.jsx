@@ -3,7 +3,7 @@ import { Input, Flex, Space, Card, App as AntdApp, Button } from "antd";
 import { useApiFetch } from '../../hooks/useApiFetch';
 import { baseUrl } from '../../configs/config';
 import { useDispatch } from 'react-redux';
-import { switchRoom, switchView, fetchRecentDMs, fetchMsgs } from '../../store/chat_slice';
+import { switchRoom, fetchRecentDMs, fetchMsgs } from '../../store/chat_slice';
 
 const { Search } = Input;
 const style = {
@@ -66,7 +66,6 @@ const ChatHome = () => {
             // 切到聊天室
             dispatch(switchRoom(room_id));
             dispatch(fetchMsgs({ roomId: room_id, userId: user.id }));
-            dispatch(switchView('chat'));
 
             // 刷新側邊欄
             dispatch(fetchRecentDMs());
